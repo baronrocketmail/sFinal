@@ -1,6 +1,5 @@
 import { initializeApp } from "firebase/app";
 import {getFirestore, collection, query, where, getDocs} from "firebase/firestore"
-import {propertyID} from "public/constants.mjs"
 
 const firebaseConfig = {
     apiKey: "AIzaSyDPGmgTxlAsVkakZrGbs8NTF2r0RcWu_ig",
@@ -14,8 +13,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore()
 
-async function fetchUnpaidObjArray() {
-    const unpaidCol = query( collection(db, "/units/" + propertyID +"/payments"), where("status", "==", "unpaid"))
+async function fetchUnpaidObjArray(propertyid) {
+    const unpaidCol = query( collection(db, "/units/" + propertyid +"/payments"), where("status", "==", "unpaid"))
     return new Promise(function(resolve, reject) {
         getDocs(unpaidCol).then(snapshot => {
             let returnObjArry = [];
@@ -26,6 +25,7 @@ async function fetchUnpaidObjArray() {
 }
 
 export default async function handler(req, res) {
-    let data = await fetchUnpaidObjArray()
+    const {propertyid} = req.headers
+    let data = await fetchUnpaidObjArray(propertyid)
     res.status(200).json(data)
 }
